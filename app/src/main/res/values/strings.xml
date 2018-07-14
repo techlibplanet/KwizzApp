@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">KwizzApp</string>
+    <string name="app_id">773820260287</string>
+    <string name="hint_username">Username</string>
+    <string name="hint_password">Password</string>
+    <string name="button_next">Next</string>
+    <string name="button_cancel">Cancel</string>
+
+    <string name="rupeeSymbol">u20B9</string>
+    <string name="rupeeText">u20A8</string>
+    <string name="hint_minute">MM</string>
+    <string name="message_minutes">Minute message</string>
+    <string name="preference_file_key">kwizzapp_pref_file_key</string>
+    <string name="you_are_offline">You are offline !</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="signin_other_error">Some error occurred. Please try again !</string>
+
+
+    <!-- leaderboard Global Rank -->
+    <string name="leaderboard_global_rank" translatable="false">CgkIv7-g2sIWEAIQAw</string>
+    <!-- leaderboard Local Rank -->
+    <string name="leaderboard_local_rank" translatable="false">CgkIv7-g2sIWEAIQBA</string>
+    <string name="alchemy_games">Alchemy Education</string>
+</resources>
