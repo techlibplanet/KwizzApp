@@ -7,12 +7,8 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
-import android.widget.Button
 
 import com.technoholicdeveloper.kwizzapp.R
-import org.jetbrains.anko.find
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -22,27 +18,17 @@ private const val ARG_PARAM2 = "param2"
 /**
  * A simple [Fragment] subclass.
  * Activities that contain this fragment must implement the
- * [WalletFragment.OnFragmentInteractionListener] interface
+ * [WithdrawalPointsFragment.OnFragmentInteractionListener] interface
  * to handle interaction events.
- * Use the [WalletFragment.newInstance] factory method to
+ * Use the [WithdrawalPointsFragment.newInstance] factory method to
  * create an instance of this fragment.
  *
  */
-class WalletFragment : Fragment(), View.OnClickListener {
-
+class WithdrawalPointsFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
     private var listener: OnFragmentInteractionListener? = null
-
-    private lateinit var leftToRight: Animation
-    private lateinit var rightToLeft : Animation
-    private lateinit var buttonAddPoints : Button
-    private lateinit var buttonWithdrawalPoints : Button
-    private lateinit var buttonTransferPoints : Button
-    private lateinit var buttonTransactions : Button
-
-    private val CLICKABLES = intArrayOf(R.id.buttonAddPoints, R.id.buttonWithdrawalPoints, R.id.buttonTransferPoints, R.id.buttonTransactions)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,46 +41,8 @@ class WalletFragment : Fragment(), View.OnClickListener {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_wallet, container, false)
-        rightToLeft = AnimationUtils.loadAnimation(activity, R.anim.right_to_left)
-        leftToRight = AnimationUtils.loadAnimation(activity, R.anim.left_to_right)
-        buttonAddPoints = view.find(R.id.buttonAddPoints)
-        buttonWithdrawalPoints = view.find(R.id.buttonWithdrawalPoints)
-        buttonTransferPoints = view.find(R.id.buttonTransferPoints)
-        buttonTransactions = view.find(R.id.buttonTransactions)
-
-        buttonAddPoints.animation = rightToLeft
-        buttonWithdrawalPoints.animation = leftToRight
-        buttonTransferPoints.animation = rightToLeft
-        buttonTransactions.animation = leftToRight
-
-        for (id in CLICKABLES){
-            view.find<Button>(id).setOnClickListener(this)
-        }
-
-        return view
+        return inflater.inflate(R.layout.fragment_withdrawal_points, container, false)
     }
-
-    override fun onClick(v: View?) {
-        when(v?.id){
-            R.id.buttonAddPoints ->{
-
-            }
-
-            R.id.buttonWithdrawalPoints ->{
-
-            }
-
-            R.id.buttonTransferPoints ->{
-
-            }
-
-            R.id.buttonTransactions ->{
-
-            }
-        }
-    }
-
 
     // TODO: Rename method, update argument and hook method into UI event
     fun onButtonPressed(uri: Uri) {
@@ -138,12 +86,12 @@ class WalletFragment : Fragment(), View.OnClickListener {
          *
          * @param param1 Parameter 1.
          * @param param2 Parameter 2.
-         * @return A new instance of fragment WalletFragment.
+         * @return A new instance of fragment WithdrawalPointsFragment.
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
-                WalletFragment().apply {
+                WithdrawalPointsFragment().apply {
                     arguments = Bundle().apply {
                         putString(ARG_PARAM1, param1)
                         putString(ARG_PARAM2, param2)
