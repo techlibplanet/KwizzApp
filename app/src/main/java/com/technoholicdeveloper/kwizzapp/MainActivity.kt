@@ -18,17 +18,22 @@ import com.google.android.gms.games.InvitationsClient
 import com.google.android.gms.games.RealTimeMultiplayerClient
 import com.technoholicdeveloper.kwizzapp.dashboard.DashboardFragment
 import com.technoholicdeveloper.kwizzapp.helper.Constants
+import com.technoholicdeveloper.kwizzapp.libplaygame.PlayGameLibrary
 import com.technoholicdeveloper.kwizzapp.login.LoginFragment
-import com.technoholicdeveloper.kwizzapp.play.PlayMenuFragment
+import com.technoholicdeveloper.kwizzapp.play.GameDetailFragment
+import com.technoholicdeveloper.kwizzapp.play.GameMenuFragment
+import com.technoholicdeveloper.kwizzapp.quiz.QuizFragment
+import com.technoholicdeveloper.kwizzapp.result.GameResultFragment
 import com.technoholicdeveloper.kwizzapp.userInfo.UserInformationFragment
-import com.technoholicdeveloper.kwizzapp.wallet.WalletFragment
 import net.rmitsolutions.mfexpert.lms.helpers.*
 
 class MainActivity : BaseActivity(), LoginFragment.OnFragmentInteractionListener,
         DashboardFragment.OnFragmentInteractionListener,
         UserInformationFragment.OnFragmentInteractionListener,
-        WalletFragment.OnFragmentInteractionListener,
-        PlayMenuFragment.OnFragmentInteractionListener{
+        GameMenuFragment.OnFragmentInteractionListener,
+        GameDetailFragment.OnFragmentInteractionListener,
+        QuizFragment.OnFragmentInteractionListener,
+        GameResultFragment.OnFragmentInteractionListener{
 
 
 
@@ -38,15 +43,16 @@ class MainActivity : BaseActivity(), LoginFragment.OnFragmentInteractionListener
     //Client used to interact with the Invitation system.
     private var mInvitationsClient: InvitationsClient? = null
     private var mPlayerId: String? = null
-//    private lateinit var playGameLib: PlayGameLib
+    private var playGameLibrary: PlayGameLibrary? = null
+    private var invitationClient : InvitationsClient? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
         val loginFrag = LoginFragment()
         switchToFragment(loginFrag)
+
 
     }
 
@@ -54,6 +60,14 @@ class MainActivity : BaseActivity(), LoginFragment.OnFragmentInteractionListener
     override fun onResume() {
         super.onResume()
         signInSilently()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (mInvitationsClient!=null){
+            PlayGameLibrary.GameConstants.mInvitationClient?.unregisterInvitationCallback(playGameLibrary?.mInvitationCallbackHandler!!)
+        }
+
     }
 
     private fun signInSilently() {
@@ -93,6 +107,7 @@ class MainActivity : BaseActivity(), LoginFragment.OnFragmentInteractionListener
                         .setNeutralButton(android.R.string.ok, null).show()
             }
         }
+        playGameLibrary?.onActivityResult(requestCode, resultCode, data)
     }
 
 
@@ -126,6 +141,9 @@ class MainActivity : BaseActivity(), LoginFragment.OnFragmentInteractionListener
                 val mobileNumber = getPref(SharedPrefKeys.MOBILE_NUMBER, "")
 
                 logD("Email - $email MobileNumber - $mobileNumber")
+                playGameLibrary = PlayGameLibrary(this)
+                invitationClient = Games.getInvitationsClient(this, playGameLibrary?.getSignInAccount()!!)
+                PlayGameLibrary.GameConstants.mInvitationClient?.registerInvitationCallback(playGameLibrary?.mInvitationCallbackHandler!!)
                 if (email=="" && mobileNumber == ""){
                     val userInfoFragment = UserInformationFragment()
                     switchToFragment(userInfoFragment)

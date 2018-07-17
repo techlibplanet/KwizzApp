@@ -35,7 +35,7 @@ class ShowDialog : View.OnClickListener {
         okay.setOnClickListener(this)
 
         dialog.show()
-        dialog.window.setLayout(600,400)
+        dialog.window.setLayout(800,600)
     }
 
     override fun onClick(v: View?) {

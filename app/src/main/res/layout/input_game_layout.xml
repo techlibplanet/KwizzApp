@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorBackground"
+    android:gravity="center">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_centerInParent="true"
+            android:layout_margin="16dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="232dp"
+            android:background="@drawable/progress_circle_dark"
+            android:indeterminate="false"
+            android:max="100"
+            android:progress="100"
+            android:progressDrawable="@drawable/progress_circle_blue"
+            android:rotation="-90"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.004" />
+
+        <TextView
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/colorWhite"
+            android:id="@+id/textViewSeconds"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="10"
+            app:layout_constraintBottom_toBottomOf="@+id/progressBar"
+            app:layout_constraintEnd_toEndOf="@+id/progressBar"
+            app:layout_constraintStart_toStartOf="@+id/progressBar"
+            app:layout_constraintTop_toTopOf="@+id/progressBar" />
+
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/textViewLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="Quiz starts in.."
+            android:textColor="@color/colorWhite"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/progressBar" />
+    </android.support.constraint.ConstraintLayout>
+
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="@dimen/dimen_16dp">
+
+        <ImageButton
+            android:background="@drawable/image_view_background"
+            android:layout_weight="1"
+            android:id="@+id/imageButtonPreviousAmount"
+            android:layout_width="100dp"
+            android:layout_height="?actionBarSize"
+            app:srcCompat="@mipmap/ic_backward" />
+
+        <TextView
+            android:textStyle="bold"
+            android:gravity="center"
+            android:padding="@dimen/space8dp"
+            android:textColor="@color/colorWhite"
+            android:textSize="@dimen/dimen_18sp"
+            android:layout_weight="1"
+            android:id="@+id/textViewAmount"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:text="TextView" />
+
+        <ImageButton
+            android:background="@drawable/image_view_background"
+            android:layout_weight="1"
+            android:id="@+id/imageButtonNextAmount"
+            android:layout_width="100dp"
+            android:layout_height="?actionBarSize"
+            app:srcCompat="@mipmap/ic_forward" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="@dimen/dimen_16dp">
+
+        <ImageButton
+
+            android:background="@drawable/image_view_background"
+            android:layout_weight="1"
+            android:id="@+id/imageButtonPreviousSubject"
+            android:layout_width="100dp"
+            android:layout_height="?actionBarSize"
+            app:srcCompat="@mipmap/ic_backward" />
+
+        <TextView
+            android:textStyle="bold"
+            android:gravity="center"
+            android:padding="@dimen/space8dp"
+            android:textColor="@color/colorWhite"
+            android:textSize="@dimen/dimen_18sp"
+            android:layout_weight="1"
+            android:id="@+id/textViewSubject"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:text="TextView" />
+
+        <ImageButton
+            android:background="@drawable/image_view_background"
+            android:layout_weight="1"
+            android:id="@+id/imageButtonNextSubject"
+            android:layout_width="100dp"
+            android:layout_height="?actionBarSize"
+            app:srcCompat="@mipmap/ic_forward" />
+
+    </LinearLayout>
+
+    <Button
+        android:layout_marginTop="@dimen/dimen_30dp"
+        android:rotationY="-30"
+        android:textColor="@color/colorWhite"
+        android:textStyle="bold"
+        android:background="@drawable/button_background_five"
+        android:id="@+id/buttonLeaveRoom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Leave Room" />
+
+
+</LinearLayout>

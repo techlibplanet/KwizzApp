@@ -10,9 +10,17 @@ import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Button
+import com.example.mayank.googleplaygame.network.wallet.Itransaction
+import com.example.mayank.googleplaygame.network.wallet.Transactions
+import com.example.mayank.myplaygame.network.ApiClient
 
 import com.technoholicdeveloper.kwizzapp.R
+import kotlinx.android.synthetic.main.wallet_menu_layout.*
+import net.rmitsolutions.mfexpert.lms.helpers.*
 import org.jetbrains.anko.find
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -28,7 +36,8 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  *
  */
-class WalletFragment : Fragment(), View.OnClickListener {
+class WalletMenuFragment : Fragment(), View.OnClickListener {
+
 
     // TODO: Rename and change types of parameters
     private var param1: String? = null
@@ -36,13 +45,14 @@ class WalletFragment : Fragment(), View.OnClickListener {
     private var listener: OnFragmentInteractionListener? = null
 
     private lateinit var leftToRight: Animation
-    private lateinit var rightToLeft : Animation
-    private lateinit var buttonAddPoints : Button
-    private lateinit var buttonWithdrawalPoints : Button
-    private lateinit var buttonTransferPoints : Button
-    private lateinit var buttonTransactions : Button
+    private lateinit var rightToLeft: Animation
+    private lateinit var buttonAddPoints: Button
+    private lateinit var buttonWithdrawalPoints: Button
+    private lateinit var buttonTransferPoints: Button
+    private lateinit var buttonTransactions: Button
 
     private val CLICKABLES = intArrayOf(R.id.buttonAddPoints, R.id.buttonWithdrawalPoints, R.id.buttonTransferPoints, R.id.buttonTransactions)
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,6 +78,8 @@ class WalletFragment : Fragment(), View.OnClickListener {
         buttonTransferPoints.animation = rightToLeft
         buttonTransactions.animation = leftToRight
 
+        checkBalance()
+
         for (id in CLICKABLES){
             view.find<Button>(id).setOnClickListener(this)
         }
@@ -75,26 +87,56 @@ class WalletFragment : Fragment(), View.OnClickListener {
         return view
     }
 
-    override fun onClick(v: View?) {
-        when(v?.id){
+    override fun onClick(view: View?) {
+        when(view?.id){
             R.id.buttonAddPoints ->{
-
+                val addPointsFragment = AddPointsFragment()
+                switchToFragment(activity!!,addPointsFragment)
             }
 
             R.id.buttonWithdrawalPoints ->{
-
+                val withdrawalPointsFragment = WithdrawalPointsFragment()
+                switchToFragment(activity!!,withdrawalPointsFragment)
             }
 
             R.id.buttonTransferPoints ->{
-
+                val transferPointsFragment = TransferPointsFragment()
+                switchToFragment(activity!!,transferPointsFragment)
             }
 
             R.id.buttonTransactions ->{
-
+                showDialog(activity!!, "Transactions", "Coming soon !")
             }
         }
     }
 
+    private fun checkBalance() {
+        val mobileNumber = activity?.getPref(SharedPrefKeys.MOBILE_NUMBER, "")
+        if (mobileNumber!=""){
+            val apiClient = ApiClient()
+            var retrofit = apiClient.getService<Itransaction>()
+            retrofit.checkBalance(mobileNumber!!).enqueue(object : Callback<Transactions> {
+                override fun onFailure(call: Call<Transactions>?, t: Throwable?) {
+                    logD("Error - $t")
+                }
+
+                override fun onResponse(call: Call<Transactions>?, response: Response<Transactions>?) {
+                    if (response?.isSuccessful!!){
+                        val balance = response.body()?.balance
+                        balanceTextView.text = "${activity?.getString(R.string.rupeeText)} - $balance"
+                    }else {
+                        logD("${response.body()?.error}")
+                        balanceTextView.text = "Failed"
+                        showDialog(activity!!, "Error","${response.body()?.error}")
+
+                    }
+                }
+
+            })
+        }else {
+            balanceTextView.visibility = View.GONE
+        }
+    }
 
     // TODO: Rename method, update argument and hook method into UI event
     fun onButtonPressed(uri: Uri) {
@@ -143,7 +185,7 @@ class WalletFragment : Fragment(), View.OnClickListener {
         // TODO: Rename and change types and number of parameters
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
-                WalletFragment().apply {
+                WalletMenuFragment().apply {
                     arguments = Bundle().apply {
                         putString(ARG_PARAM1, param1)
                         putString(ARG_PARAM2, param2)

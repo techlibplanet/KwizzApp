@@ -6,6 +6,7 @@ import android.os.Environment
 import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.View
 import com.madhuteja.checknet.CheckConnection
 import com.technoholicdeveloper.kwizzapp.R
@@ -73,11 +74,11 @@ fun Activity.snackBar(view: View, message: String?, duration: Int = Snackbar.LEN
 // logging extensions
 fun Activity.logE(t: Throwable, message: String?) = Timber.e(t, message)
 
-fun Activity.logE(message: String?) = Timber.e(message)
+fun Activity.logE(message: String?) = Log.e("KwizzApp",message)
 
 fun Activity.logD(t: Throwable, message: String?) = Timber.d(t, message)
 
-fun Activity.logD(message: String?) = Timber.d(message)
+fun Activity.logD(message: String?) = Log.d("KwizzApp",message)
 
 //external storage check
 val Activity.isExternalStorageWritable: Boolean

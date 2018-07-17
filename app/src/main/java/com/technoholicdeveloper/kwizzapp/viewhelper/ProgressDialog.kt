@@ -13,7 +13,7 @@ class ProgressDialog {
 
     private lateinit var activity: Activity
     private lateinit var dialog: Dialog
-    private lateinit var progressBar: ProgressBar
+    private var progressBar: ProgressBar? = null
 
     fun showProgressDialog(activity: Activity){
         this.activity = activity
@@ -23,13 +23,13 @@ class ProgressDialog {
         dialog.setContentView(R.layout.progress_dialog_layout)
         dialog.window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         progressBar = dialog.findViewById(R.id.progressBar)
-        progressBar.visibility = View.VISIBLE
+        progressBar?.visibility = View.VISIBLE
         dialog.show()
     }
 
 
     fun hideProgressDialog(){
-        progressBar.visibility = View.GONE
+        progressBar?.visibility = View.GONE
         dialog.dismiss()
     }
 }

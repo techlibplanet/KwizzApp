@@ -19,10 +19,11 @@ import com.technoholicdeveloper.kwizzapp.MainActivity
 import com.technoholicdeveloper.kwizzapp.R
 import com.technoholicdeveloper.kwizzapp.helper.Constants
 import com.technoholicdeveloper.kwizzapp.login.LoginFragment
-import com.technoholicdeveloper.kwizzapp.play.PlayMenuFragment
-import com.technoholicdeveloper.kwizzapp.wallet.WalletFragment
+import com.technoholicdeveloper.kwizzapp.play.GameMenuFragment
+import com.technoholicdeveloper.kwizzapp.wallet.WalletActivity
 import net.rmitsolutions.mfexpert.lms.helpers.clearPrefs
 import net.rmitsolutions.mfexpert.lms.helpers.logD
+import net.rmitsolutions.mfexpert.lms.helpers.showDialog
 import net.rmitsolutions.mfexpert.lms.helpers.switchToFragment
 import org.jetbrains.anko.find
 import kotlin.math.sign
@@ -51,11 +52,6 @@ class DashboardFragment : Fragment(), View.OnClickListener {
 
     private lateinit var leftToRight: Animation
     private lateinit var rightToLeft : Animation
-    private lateinit var buttonPlay : Button
-    private lateinit var buttonAchievements : Button
-    private lateinit var buttonLeaderboards : Button
-    private lateinit var buttonWallet : Button
-    private lateinit var buttonSignOut : Button
 
     private val CLICKABLES = intArrayOf(R.id.buttonPlay, R.id.buttonAchievements, R.id.buttonLeaderboards, R.id.buttonWallet, R.id.buttonSignOut)
 
@@ -71,20 +67,18 @@ class DashboardFragment : Fragment(), View.OnClickListener {
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_dashboard, container, false)
-        buttonPlay = view.find(R.id.buttonPlay)
-        buttonAchievements = view.find(R.id.buttonAchievements)
-        buttonLeaderboards = view.find(R.id.buttonLeaderboards)
-        buttonWallet = view.find(R.id.buttonWallet)
-        buttonSignOut = view.find(R.id.buttonSignOut)
         rightToLeft = AnimationUtils.loadAnimation(activity, R.anim.right_to_left)
         leftToRight = AnimationUtils.loadAnimation(activity, R.anim.left_to_right)
-        buttonPlay.animation = rightToLeft
-        buttonAchievements.animation = leftToRight
-        buttonLeaderboards.animation = rightToLeft
-        buttonWallet.animation = leftToRight
-        buttonSignOut.animation = rightToLeft
+
         for (id in CLICKABLES){
             view.find<Button>(id).setOnClickListener(this)
+            when(id){
+                R.id.buttonPlay ->view.find<Button>(id).animation = rightToLeft
+                R.id.buttonAchievements ->view.find<Button>(id).animation = leftToRight
+                R.id.buttonLeaderboards ->view.find<Button>(id).animation = rightToLeft
+                R.id.buttonWallet ->view.find<Button>(id).animation = leftToRight
+                R.id.buttonSignOut ->view.find<Button>(id).animation = rightToLeft
+            }
         }
         return view
     }
@@ -106,13 +100,14 @@ class DashboardFragment : Fragment(), View.OnClickListener {
             }
 
             R.id.buttonWallet ->{
-                val walletFragment = WalletFragment()
-                switchToFragment(activity!!, walletFragment)
+                val intent = Intent(activity, WalletActivity::class.java)
+                startActivity(intent)
             }
 
             R.id.buttonPlay ->{
-                val playMenuFragment = PlayMenuFragment()
+                val playMenuFragment = GameMenuFragment()
                 switchToFragment(activity!!,playMenuFragment)
+
             }
         }
     }
