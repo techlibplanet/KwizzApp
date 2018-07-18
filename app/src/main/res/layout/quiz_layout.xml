@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:background="@color/colorBackground">
 
@@ -13,16 +14,60 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <TextSwitcher
-                android:layout_marginTop="10dp"
-                android:background="@drawable/text_view_question_background"
-                android:gravity="center"
-                android:layout_gravity="center_horizontal"
-                android:textColor="@color/colorBlack"
-                android:id="@+id/textSwitcherCountdown"
-                android:text="Quiz Start in "
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"/>
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_centerInParent="true"
+                    android:layout_margin="16dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="@drawable/quiz_progress_circle_dark"
+                    android:indeterminate="false"
+                    android:max="100"
+                    android:progress="100"
+                    android:progressDrawable="@drawable/quiz_progress_circle_blue"
+                    android:rotation="-90"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.004" />
+
+                <TextView
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorWhite"
+                    android:id="@+id/textViewSeconds"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:text="10"
+                    app:layout_constraintBottom_toBottomOf="@+id/progressBar"
+                    app:layout_constraintEnd_toEndOf="@+id/progressBar"
+                    app:layout_constraintStart_toStartOf="@+id/progressBar"
+                    app:layout_constraintTop_toTopOf="@+id/progressBar" />
+
+            </android.support.constraint.ConstraintLayout>
+
+            <!--<TextSwitcher-->
+                <!--android:layout_marginTop="10dp"-->
+                <!--android:background="@drawable/text_view_question_background"-->
+                <!--android:gravity="center"-->
+                <!--android:layout_gravity="center_horizontal"-->
+                <!--android:textColor="@color/colorBlack"-->
+                <!--android:id="@+id/textSwitcherCountdown"-->
+                <!--android:text="Quiz Start in "-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_width="match_parent"/>-->
 
             <TextView
                 android:textAlignment="textStart"
@@ -41,7 +86,7 @@
                 android:layout_marginLeft="15dp"
                 android:background="@drawable/text_view_question_background"
                 android:textSize="16sp"
-                android:id="@+id/text_view_option_a"
+                android:id="@+id/textViewOptionA"
                 android:layout_marginTop="5dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -54,7 +99,7 @@
                 android:layout_marginLeft="15dp"
                 android:background="@drawable/text_view_question_background"
                 android:textSize="16sp"
-                android:id="@+id/text_view_option_b"
+                android:id="@+id/textViewOptionB"
                 android:layout_marginTop="5dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -67,7 +112,7 @@
                 android:layout_marginLeft="15dp"
                 android:background="@drawable/text_view_question_background"
                 android:textSize="16sp"
-                android:id="@+id/text_view_option_c"
+                android:id="@+id/textViewOptionC"
                 android:layout_marginTop="5dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -80,7 +125,7 @@
                 android:layout_marginLeft="15dp"
                 android:background="@drawable/text_view_question_background"
                 android:textSize="16sp"
-                android:id="@+id/text_view_option_d"
+                android:id="@+id/textViewOptionD"
                 android:layout_marginTop="5dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -93,7 +138,7 @@
                 android:layout_marginLeft="15dp"
                 android:background="@drawable/text_view_question_background"
                 android:textSize="16sp"
-                android:id="@+id/text_view_option_e"
+                android:id="@+id/textViewOptionE"
                 android:layout_marginTop="5dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

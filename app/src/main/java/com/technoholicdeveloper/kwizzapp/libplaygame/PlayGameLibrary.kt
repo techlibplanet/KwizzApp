@@ -16,6 +16,7 @@ import android.view.Window
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import com.example.mayank.googleplaygame.network.wallet.Itransaction
 import com.example.mayank.googleplaygame.network.wallet.Transactions
 import com.example.mayank.myplaygame.network.ApiClient
@@ -29,6 +30,7 @@ import com.google.android.gms.games.multiplayer.Multiplayer
 import com.google.android.gms.games.multiplayer.Participant
 import com.google.android.gms.games.multiplayer.realtime.*
 import com.google.android.gms.tasks.OnFailureListener
+import com.technoholicdeveloper.kwizzapp.MainActivity
 import com.technoholicdeveloper.kwizzapp.libplaygame.PlayGameLibrary.GameConstants.mInvitationClient
 import com.technoholicdeveloper.kwizzapp.libplaygame.PlayGameLibrary.GameConstants.mResultBuf
 import com.technoholicdeveloper.kwizzapp.play.GameDetailFragment
@@ -41,7 +43,10 @@ import java.util.ArrayList
 import java.util.HashMap
 import java.util.HashSet
 import com.technoholicdeveloper.kwizzapp.R
-import com.technoholicdeveloper.kwizzapp.result.adapter.ResultViewModel
+import com.technoholicdeveloper.kwizzapp.result.GameResultFragment
+import com.technoholicdeveloper.kwizzapp.result.adapter.FinalResultViewModel
+import com.technoholicdeveloper.kwizzapp.viewmodels.ResultViewModel
+import io.reactivex.internal.operators.flowable.FlowableDoFinally
 import net.rmitsolutions.mfexpert.lms.helpers.*
 import org.jetbrains.anko.find
 
@@ -80,6 +85,7 @@ class PlayGameLibrary (private val activity: Activity){
         var mPlayerId: String? = null
         var mInvitationClient : InvitationsClient? = null
         lateinit var modelList: MutableList<ResultViewModel>
+        lateinit var resultList :MutableList<FinalResultViewModel>
         var imageUri : Uri?= null
         var balanceAdded : Boolean = false
     }
@@ -89,6 +95,7 @@ class PlayGameLibrary (private val activity: Activity){
 
 
     init {
+        GameConstants.resultList = mutableListOf<FinalResultViewModel>()
         GameConstants.mRealTimeMultiplayerClient = getRealTimeMultiPlayerClient()
         GameConstants.mPlayerClient = getPlayerClient()
         GameConstants.displayName = getDisplayName()
@@ -113,6 +120,9 @@ class PlayGameLibrary (private val activity: Activity){
     }
 
     fun clearData(){
+        GameConstants.mInvitationClient = null
+        GameConstants.mRoomId = null
+        GameConstants.mRoomConfig = null
         GameConstants.mFinishedParticipants.clear()
         GameConstants.mParticipantScore.clear()
         GameConstants.mParticipants.clear()
@@ -381,11 +391,11 @@ class PlayGameLibrary (private val activity: Activity){
 
     private fun sendBroadcastResult(state: Char, value1: Int, value2: Int, value3: Int) {
         Log.d(TAG, "Sending broadcast")
-//        activity.sendBroadcast(Intent(MultiplayerResultFragment.ACTION_RESULT_RECEIVED)
-//                .putExtra("state", state)
-//                .putExtra("RightAnswers", value1)
-//                .putExtra("WrongAnswers", value2)
-//                .putExtra("DropQuestions", value3))
+        activity.sendBroadcast(Intent(GameResultFragment.ACTION_RESULT_RECEIVED)
+                .putExtra("state", state)
+                .putExtra("RightAnswers", value1)
+                .putExtra("WrongAnswers", value2)
+                .putExtra("DropQuestions", value3))
     }
 
     private fun sendBroadcastFinalResult(state: Char, displayName : String,value1: Int){
@@ -438,10 +448,13 @@ class PlayGameLibrary (private val activity: Activity){
             Log.d(TAG, "On disconnected from room")
             GameConstants.mRoomId = null
             GameConstants.mRoomConfig = null
-            showGameError()
+            showDialog.dialog(activity, "Error", "1. User left the game.\n2. Unknown error occurred !")
+            Toast.makeText(activity, "User left the game or unknown error occurred !", Toast.LENGTH_LONG).show()
             clearData()
-            val gameMenuFragment = GameMenuFragment()
-            switchToFragment(gameMenuFragment)
+//            val gameMenuFragment = GameMenuFragment()
+//            switchToFragment(gameMenuFragment)
+            val intent = Intent(activity, MainActivity::class.java)
+            activity.startActivity(intent)
         }
 
 
@@ -546,10 +559,20 @@ class PlayGameLibrary (private val activity: Activity){
                 .setInvitationIdToAccept(invitationId)
                 .setOnMessageReceivedListener(mOnRealTimeMessageReceivedListener)
                 .setRoomStatusUpdateCallback(mRoomStatusUpdateCallback).build()
-        activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        keepScreenOn()
 
         Games.getRealTimeMultiplayerClient(activity, GoogleSignIn.getLastSignedInAccount(activity)!!).join(GameConstants.mRoomConfig!!)
 
+    }
+
+    private fun declineInvitation(invitationId: String){
+        GameConstants.mRoomConfig = RoomConfig.builder(mRoomUpdateCallback)
+                .setInvitationIdToAccept(invitationId)
+                .setOnMessageReceivedListener(mOnRealTimeMessageReceivedListener)
+                .setRoomStatusUpdateCallback(mRoomStatusUpdateCallback).build()
+        stopKeepingScreenOn()
+
+        Games.getRealTimeMultiplayerClient(activity, GoogleSignIn.getLastSignedInAccount(activity)!!).declineInvitation(invitationId)
 
     }
 
@@ -609,6 +632,7 @@ class PlayGameLibrary (private val activity: Activity){
             dialog?.dismiss()
         }
         reject?.setOnClickListener {
+            declineInvitation(invitationId)
             dialog?.dismiss()
         }
 
@@ -668,8 +692,11 @@ class PlayGameLibrary (private val activity: Activity){
                     }
             //switchToScreen(R.id.screen_wait)
             Log.d(TAG, "Room left successfully")
-            val gameMenuFragment = GameMenuFragment()
-            switchToFragment(gameMenuFragment)
+            clearData()
+//            val gameMenuFragment = GameMenuFragment()
+//            switchToFragment(gameMenuFragment)
+            val intent = Intent(activity, MainActivity::class.java)
+            activity.startActivity(intent)
 
         } else {
 //            switchToMainScreen()

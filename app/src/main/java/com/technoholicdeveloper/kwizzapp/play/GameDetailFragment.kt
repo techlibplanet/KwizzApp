@@ -19,6 +19,7 @@ import com.example.mayank.myplaygame.network.ApiClient
 import com.technoholicdeveloper.kwizzapp.R
 import com.technoholicdeveloper.kwizzapp.libplaygame.PlayGameLibrary
 import com.technoholicdeveloper.kwizzapp.quiz.QuizFragment
+import com.technoholicdeveloper.kwizzapp.viewmodels.ResultViewModel
 import kotlinx.android.synthetic.main.input_game_layout.*
 import net.rmitsolutions.mfexpert.lms.helpers.*
 import org.jetbrains.anko.find
@@ -26,6 +27,8 @@ import org.jetbrains.anko.support.v4.find
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.lang.IllegalArgumentException
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 // TODO: Rename parameter arguments, choose names that match
@@ -54,9 +57,9 @@ class GameDetailFragment : Fragment(), View.OnClickListener {
     private var j: Int = 0
     private var k = -1
     private var l: Int = 0
-    private var subject : String?=null
-    private var subCode : String?= null
-    private var amount : String? = null
+    private var subject: String? = null
+    private var subCode: String? = null
+    private var amount: String? = null
     private lateinit var amountList: Array<String>
     private lateinit var subjectList: Array<String>
     private lateinit var subjectCode: Array<String>
@@ -70,7 +73,8 @@ class GameDetailFragment : Fragment(), View.OnClickListener {
     private var timeCountInMilliSeconds = (1 * 10000).toLong()
     private val CLICKABLES = intArrayOf(R.id.imageButtonNextAmount, R.id.imageButtonNextSubject,
             R.id.imageButtonPreviousAmount, R.id.imageButtonPreviousSubject)
-    private var textLabel : TextView? = null
+    private var textLabel: TextView? = null
+    private var subtract: Boolean = false
 
     private enum class TimerStatus {
         STARTED,
@@ -105,32 +109,28 @@ class GameDetailFragment : Fragment(), View.OnClickListener {
     }
 
     override fun onClick(v: View?) {
-        when(v?.id){
+        when (v?.id) {
             R.id.imageButtonNextAmount -> {
                 nextAmount()
 //                playGameLib?.broadcastScore(true)
                 playGameLibrary.broadcastMessage('A', 0)
-                //resetCountdownTimer(10000, 1000)
                 reset()
             }
 
             R.id.imageButtonPreviousAmount -> {
                 previousAmount()
                 playGameLibrary.broadcastMessage('A', 1)
-                //resetCountdownTimer(10000, 1000)
                 reset()
 
             }
             R.id.imageButtonPreviousSubject -> {
                 previousSubject()
                 playGameLibrary.broadcastMessage('S', 1)
-                //resetCountdownTimer(10000, 1000)
                 reset()
             }
 
             R.id.imageButtonNextSubject -> {
                 nextSubject()
-                //resetCountdownTimer(10000, 1000)
                 reset()
                 playGameLibrary.broadcastMessage('S', 0)
             }
@@ -141,8 +141,8 @@ class GameDetailFragment : Fragment(), View.OnClickListener {
         }
     }
 
-    private fun start(){
-        if (timerStatus == TimerStatus.STOPPED){
+    private fun start() {
+        if (timerStatus == TimerStatus.STOPPED) {
             setTimerValues()
             setProgressBarValue()
             timerStatus = TimerStatus.STARTED
@@ -160,7 +160,6 @@ class GameDetailFragment : Fragment(), View.OnClickListener {
         countDownTimer = object : CountDownTimer(timeCountInMilliSeconds, 1000) {
             override fun onTick(millisUntilFinished: Long) {
 
-//                textViewTime!!.text = hmsTimeFormatter(millisUntilFinished)
                 textViewSeconds!!.text = secondsFormatter(millisUntilFinished)
                 progressBar!!.progress = (millisUntilFinished / 1000).toInt()
 
@@ -168,8 +167,7 @@ class GameDetailFragment : Fragment(), View.OnClickListener {
 
             override fun onFinish() {
 
-//                textViewTime!!.text = hmsTimeFormatter(timeCountInMilliSeconds)
-                textViewSeconds!!.text = "0"
+                //textViewSeconds!!.text = "0"
                 // call to initialize the progress bar values
                 //setProgressBarValue()
 
@@ -177,11 +175,11 @@ class GameDetailFragment : Fragment(), View.OnClickListener {
                 // changing the timer status to stopped
                 timerStatus = TimerStatus.STOPPED
 
-                if (amount==null){
+                if (amount == null) {
                     Toast.makeText(activity, "Select a valid Amount!", Toast.LENGTH_SHORT).show()
-                }else if(subject == null){
+                } else if (subject == null) {
                     Toast.makeText(activity, "Select a valid subject!", Toast.LENGTH_SHORT).show()
-                }else{
+                } else {
                     checkBalance()
                 }
             }
@@ -198,7 +196,7 @@ class GameDetailFragment : Fragment(), View.OnClickListener {
             retrofit.checkBalance(mobileNumber!!).enqueue(object : Callback<Transactions> {
                 override fun onFailure(call: Call<Transactions>?, t: Throwable?) {
                     logD("Error - $t")
-                    activity?.showDialog(activity!!,"Error", "$t" )
+                    activity?.showDialog(activity!!, "Error", "$t")
 
                 }
 
@@ -207,26 +205,17 @@ class GameDetailFragment : Fragment(), View.OnClickListener {
                         val balance = response.body()?.balance
 
                         if (amount!! <= balance!!) {
-                            if (activity!=null){
-                                val bundle = Bundle()
-                                bundle.putString("Subject", subject)
-                                bundle.putString("SubjectCode", subCode)
-                                bundle.putFloat("Amount", amount?.toFloat()!!)
-//                              val quizFragment = SinglePlayerQuizFragment()
-//                              quizFragment.arguments = bundle
-//                               playGameLib?.switchToFragment(quizFragment)
-                                logD("Amount - $amount code -$subCode subject -$subject")
-
-                                val quizFragment = QuizFragment()
-                                quizFragment.arguments = bundle
-                                switchToFragment(activity!!,quizFragment)
-                                unRegisterBroadcastReceiver()
+                            if (activity != null) {
+                                +
+                                logD("Subtracting amount -$amount")
+                                if (!subtract) {
+                                    subtractBalance(PlayGameLibrary.GameConstants.displayName!!, amount?.toFloat(), Calendar.getInstance().time.toString())
+                                    subtract = true
+                                }
                             }
-//                            if (countDownTimer != null) {
-//                                countDownTimer?.cancel()
-//                            }
+
                         } else {
-                            activity?.showDialog(activity!!, "Warning", "one of the opponent may have insufficient balance amount !.\nSelect lower amount")
+                            showDialog(activity!!, "Warning", "one of the opponent may have insufficient balance amount !.\nSelect lower amount")
                         }
                     }
                 }
@@ -236,8 +225,47 @@ class GameDetailFragment : Fragment(), View.OnClickListener {
         }
     }
 
+
+    private fun subtractBalance(playerName: String, amount: Float?, timeStamp: String) {
+        val apiClient = ApiClient()
+        var retrofit = apiClient.getService<Itransaction>()
+        retrofit.subtractResultBalance(playerName, amount!!, timeStamp).enqueue(object : Callback<Transactions> {
+            override fun onFailure(call: Call<Transactions>?, t: Throwable?) {
+                showDialog(activity!!, "Error", "Error : $t")
+            }
+
+            override fun onResponse(call: Call<Transactions>?, response: Response<Transactions>?) {
+                if (response?.isSuccessful!!) {
+//                    val balance = response.body()?.balance
+                    if (countDownTimer != null) {
+                        countDownTimer?.cancel()
+                    }
+                    val bundle = Bundle()
+                    bundle.putString("Subject", subject)
+                    bundle.putString("SubjectCode", subCode)
+                    bundle.putFloat("Amount", amount.toFloat())
+//                              val quizFragment = SinglePlayerQuizFragment()
+//                              quizFragment.arguments = bundle
+//                               playGameLib?.switchToFragment(quizFragment)
+                    logD("Amount - $amount code -$subCode subject -$subject")
+                    if (activity != null) {
+                        val quizFragment = QuizFragment()
+                        quizFragment.arguments = bundle
+                        switchToFragment(activity!!, quizFragment)
+                        unRegisterBroadcastReceiver()
+                    } else {
+                        logD("Activity is null")
+                    }
+                } else {
+                    showDialog(activity!!, "Summary", "Error : ${response.body()?.error}")
+                }
+            }
+
+        })
+    }
+
     private fun stopCountdownTimer() {
-        if (timerStatus == TimerStatus.STARTED){
+        if (timerStatus == TimerStatus.STARTED) {
             countDownTimer?.cancel()
         }
     }
@@ -249,7 +277,7 @@ class GameDetailFragment : Fragment(), View.OnClickListener {
 
     private fun reset() {
         textLabel?.visibility = View.VISIBLE
-        if (timerStatus == TimerStatus.STOPPED){
+        if (timerStatus == TimerStatus.STOPPED) {
             setTimerValues()
             setProgressBarValue()
             timerStatus = TimerStatus.STARTED
@@ -407,6 +435,14 @@ class GameDetailFragment : Fragment(), View.OnClickListener {
     }
 
     private fun unRegisterBroadcastReceiver() {
-        activity?.unregisterReceiver(messageBroadcastReceiver)
+        try {
+            if (messageBroadcastReceiver != null) {
+                activity?.unregisterReceiver(messageBroadcastReceiver)
+            }
+        } catch (e: IllegalArgumentException) {
+            logE("Error - $e")
+        }
+
+
     }
 }

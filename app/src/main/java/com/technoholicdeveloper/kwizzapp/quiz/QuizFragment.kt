@@ -9,23 +9,28 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import android.widget.TextSwitcher
 import android.widget.TextView
+import android.widget.Toast
 import com.example.mayank.myplaygame.network.ApiClient
 import com.example.mayank.myplaygame.network.IQuestion
 import com.example.mayank.myplaygame.network.Question
 
 import com.technoholicdeveloper.kwizzapp.R
 import com.technoholicdeveloper.kwizzapp.libplaygame.PlayGameLibrary
+import com.technoholicdeveloper.kwizzapp.play.GameDetailFragment
+import com.technoholicdeveloper.kwizzapp.result.DROP_QUESTIONS
 import com.technoholicdeveloper.kwizzapp.result.GameResultFragment
-import net.rmitsolutions.mfexpert.lms.helpers.hideProgress
-import net.rmitsolutions.mfexpert.lms.helpers.logD
-import net.rmitsolutions.mfexpert.lms.helpers.showProgress
-import net.rmitsolutions.mfexpert.lms.helpers.switchToFragment
+import com.technoholicdeveloper.kwizzapp.result.RIGHT_ANSWERS
+import com.technoholicdeveloper.kwizzapp.result.WRONG_ANSWERS
+import net.rmitsolutions.mfexpert.lms.helpers.*
+import org.jetbrains.anko.find
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -68,9 +73,16 @@ class QuizFragment : Fragment(), View.OnClickListener {
     private lateinit var textViewCount: TextView
     private var playGameLibrary : PlayGameLibrary? = null
     private var numberOfRows : Int? = null
+    private var progressBar: ProgressBar? = null
+    private var timerStatus = TimerStatus.STOPPED
+    private var timeCountInMilliSeconds = (1 * 10000).toLong()
+    private var textViewSeconds: TextView? = null
+    private enum class TimerStatus {
+        STARTED,
+        STOPPED
+    }
 
-
-    private val CLICKABLES = intArrayOf(R.id.text_view_option_a,R.id.text_view_option_b,R.id.text_view_option_c, R.id.text_view_option_d,R.id.text_view_option_e)
+    private val CLICKABLES = intArrayOf(R.id.textViewOptionA,R.id.textViewOptionB,R.id.textViewOptionC, R.id.textViewOptionD,R.id.textViewOptionE)
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,7 +98,7 @@ class QuizFragment : Fragment(), View.OnClickListener {
 
         playGameLibrary = PlayGameLibrary(activity!!)
 
-        showProgress()
+        //showProgress()
 
         getNumberOfRows()
 
@@ -118,57 +130,138 @@ class QuizFragment : Fragment(), View.OnClickListener {
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_quiz, container, false)
+        progressBar = view.find(R.id.progressBar)
+        textViewSeconds = view.find(R.id.textViewSeconds)
         for (id in CLICKABLES){
-            view.findViewById<TextView>(id).setOnClickListener(this)
+            view.find<TextView>(id).setOnClickListener(this)
         }
 
         return view
     }
 
+    private fun reset() {
+        if (timerStatus == TimerStatus.STOPPED) {
+            setTimerValues()
+            setProgressBarValue()
+            timerStatus = TimerStatus.STARTED
+            startCountdownTimer()
+            return
+        }
+        stopCountdownTimer()
+        startCountdownTimer()
+    }
+
+    private fun stopCountdownTimer() {
+        if (timerStatus == TimerStatus.STARTED) {
+            countDownTimer?.cancel()
+        }
+    }
+
+    private fun setTimerValues() {
+        var time = -1
+        // assigning values after converting to milliseconds
+        time = if (subjectCode == "apt_ques"){
+            6
+        }else{
+            1
+        }
+        timeCountInMilliSeconds = (time * 10 * 1000).toLong()
+    }
+
+    private fun setProgressBarValue() {
+        progressBar!!.max = timeCountInMilliSeconds.toInt() / 1000
+        progressBar!!.progress = timeCountInMilliSeconds.toInt() * 1000
+    }
+
+    private fun startCountdownTimer() {
+        countDownTimer = object : CountDownTimer(timeCountInMilliSeconds, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+
+                textViewSeconds!!.text = secondsFormatter(millisUntilFinished)
+                progressBar!!.progress = (millisUntilFinished / 1000).toInt()
+
+            }
+
+            override fun onFinish() {
+
+                //textViewSeconds!!.text = "0"
+                // call to initialize the progress bar values
+                //setProgressBarValue()
+
+
+                // changing the timer status to stopped
+                timerStatus = TimerStatus.STOPPED
+                if(q<10){
+                    dropQuestions++
+                    getQuestionFromServer()
+                }else {
+                    dropQuestions++
+                    changeToResultScreen()
+                    // Broadcast score here
+                }
+
+
+            }
+
+        }.start()
+        countDownTimer!!.start()
+    }
+
+    private fun secondsFormatter(milliSeconds: Long): String {
+        return String.format("%02d", TimeUnit.MILLISECONDS.toSeconds(milliSeconds) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(milliSeconds)))
+    }
+
     override fun onClick(view: View?) {
         when(view?.id){
-            R.id.text_view_option_a ->{
-                if (view.findViewById<TextView>(R.id.text_view_option_a)?.text == answer){
+            R.id.textViewOptionA ->{
+                if (view.find<TextView>(R.id.textViewOptionA).text == answer){
                     rightAnswers++
                 }else {
                     wrongAnswers++
                 }
+
+                getQuestionFromServer()
+
+            }
+
+            R.id.textViewOptionB ->{
+                if (view.find<TextView>(R.id.textViewOptionB).text == answer){
+                    rightAnswers++
+                }else {
+                    wrongAnswers++
+                }
+
+                getQuestionFromServer()
+
+            }
+
+            R.id.textViewOptionC ->{
+                if (view.find<TextView>(R.id.textViewOptionC).text == answer){
+                    rightAnswers++
+                }else {
+                    wrongAnswers++
+                }
+
                 getQuestionFromServer()
             }
 
-            R.id.text_view_option_b ->{
-                if (view.findViewById<TextView>(R.id.text_view_option_b)?.text == answer){
+            R.id.textViewOptionD ->{
+                if (view.find<TextView>(R.id.textViewOptionD).text == answer){
                     rightAnswers++
                 }else {
                     wrongAnswers++
                 }
+
                 getQuestionFromServer()
             }
 
-            R.id.text_view_option_c ->{
-                if (view.findViewById<TextView>(R.id.text_view_option_c)?.text == answer){
+            R.id.textViewOptionE ->{
+                if (view.find<TextView>(R.id.textViewOptionE).text == answer){
                     rightAnswers++
                 }else {
                     wrongAnswers++
                 }
-                getQuestionFromServer()
-            }
 
-            R.id.text_view_option_d ->{
-                if (view.findViewById<TextView>(R.id.text_view_option_d)?.text == answer){
-                    rightAnswers++
-                }else {
-                    wrongAnswers++
-                }
-                getQuestionFromServer()
-            }
-
-            R.id.text_view_option_e ->{
-                if (view.findViewById<TextView>(R.id.text_view_option_e)?.text == answer){
-                    rightAnswers++
-                }else {
-                    wrongAnswers++
-                }
                 getQuestionFromServer()
             }
         }
@@ -182,6 +275,8 @@ class QuizFragment : Fragment(), View.OnClickListener {
             retrofit.getNumberOfRows(subjectCode!!).enqueue(object : Callback<Question> {
                 override fun onFailure(call: Call<Question>?, t: Throwable?) {
                     logD("Error : $t")
+                    hideProgress()
+                    showDialog(activity!!, "Error", "$t")
                 }
 
                 override fun onResponse(call: Call<Question>?, response: Response<Question>?) {
@@ -191,7 +286,7 @@ class QuizFragment : Fragment(), View.OnClickListener {
 
                         getRandomNonRepeatingIntegers(rowCount!!, 1, rowCount!!)
                         getQuestionFromServer()
-                        hideProgress()
+
 
                     }
                 }
@@ -202,11 +297,12 @@ class QuizFragment : Fragment(), View.OnClickListener {
     private fun getQuestionFromServer() {
         val apiClient = ApiClient()
         var retrofit = apiClient.getService<IQuestion>()
-        logD("Random question - ${randomNumbers[q]}")
         if (q<10){
             retrofit.getQuestion(randomNumbers[q].toString(), subjectCode!!).enqueue(object : Callback<Question> {
                 override fun onFailure(call: Call<Question>?, t: Throwable?) {
                     logD("Error : $t")
+                    hideProgress()
+                    showDialog(activity!!, "Error", "$t")
                 }
 
                 override fun onResponse(call: Call<Question>?, response: Response<Question>?) {
@@ -216,6 +312,9 @@ class QuizFragment : Fragment(), View.OnClickListener {
                         q++
                         setQuestionTextViews(result)
                         //resetCountdownTimer(10000,1000)
+                        reset()
+
+
                     }
                 }
             })
@@ -232,12 +331,13 @@ class QuizFragment : Fragment(), View.OnClickListener {
 
     private fun setQuestionTextViews(result: Question?) {
         answer = result?.answer!!
-        view?.findViewById<TextView>(R.id.text_view_question)?.text = "Q. ${result.question}"
-        view?.findViewById<TextView>(R.id.text_view_option_a)?.text =  "1. ${result.optionA}"         //result.optionA
-        view?.findViewById<TextView>(R.id.text_view_option_b)?.text = "2. ${result.optionB}"
-        view?.findViewById<TextView>(R.id.text_view_option_c)?.text = "3. ${result.optionC}"
-        view?.findViewById<TextView>(R.id.text_view_option_d)?.text = "4. ${result.optionD}"
-        view?.findViewById<TextView>(R.id.text_view_option_e)?.text = "5. ${result.optionE}"
+        view?.find<TextView>(R.id.text_view_question)?.text = "${result.question}"
+        view?.find<TextView>(R.id.textViewOptionA)?.text =  "${result.optionA}"         //result.optionA
+        view?.find<TextView>(R.id.textViewOptionB)?.text = "${result.optionB}"
+        view?.find<TextView>(R.id.textViewOptionC)?.text = "${result.optionC}"
+        view?.find<TextView>(R.id.textViewOptionD)?.text = "${result.optionD}"
+        view?.find<TextView>(R.id.textViewOptionE)?.text = "${result.optionE}"
+        //hideProgress()
     }
 
     private fun changeToResultScreen(){
@@ -248,10 +348,14 @@ class QuizFragment : Fragment(), View.OnClickListener {
         logD("Display Name - ${PlayGameLibrary.GameConstants.displayName}")
         playGameLibrary?.broadcastResult('R', rightAnswers, wrongAnswers, dropQuestions)
         val bundle = Bundle()
-        bundle.putFloat("Amount", amount!!)
-        bundle.putInt("RightAnswers", rightAnswers)
-        bundle.putInt("WrongAnswers", wrongAnswers)
-        bundle.putInt("DropQuestions", dropQuestions)
+        bundle.putFloat(AMOUNT, amount!!)
+        bundle.putInt(RIGHT_ANSWERS, rightAnswers)
+        bundle.putInt(WRONG_ANSWERS, wrongAnswers)
+        bundle.putInt(DROP_QUESTIONS, dropQuestions)
+        logD("Quiz Right - $rightAnswers")
+        logD("Quiz Wrong -$wrongAnswers")
+        logD("Quiz Drop - $dropQuestions")
+
         bundle.putString("DisplayName", PlayGameLibrary.GameConstants.displayName)
         val resultFragment = GameResultFragment()
         resultFragment.arguments = bundle

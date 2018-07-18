@@ -54,7 +54,7 @@
 
 
     <string-array name="subject_code">
-        <item>aptitude</item>
+        <item>apt_ques</item>
         <item>reasoning</item>
         <item>gawareness</item>
         <item>computer</item>

@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.technoholicdeveloper.kwizzapp.R
+import com.technoholicdeveloper.kwizzapp.viewmodels.ResultViewModel
 
 class ResultViewAdapter: RecyclerView.Adapter<ResultViewHolder>() {
 
@@ -13,7 +14,7 @@ class ResultViewAdapter: RecyclerView.Adapter<ResultViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ResultViewHolder {
         context = parent.context
-        val v = LayoutInflater.from(context).inflate(R.layout.result_row, parent, false)
+        val v = LayoutInflater.from(context).inflate(R.layout.result_row_old, parent, false)
         return ResultViewHolder(v)
     }
 

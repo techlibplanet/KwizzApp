@@ -17,10 +17,10 @@ import timber.log.Timber
 
 fun Fragment.toast(message: String?) = activity!!.toast("$message")
 
-fun Fragment.showProgress() = activity!!.showProgress()
+fun Fragment.showProgress() = activity?.showProgress()
 
 fun Fragment.hideProgress() {
-    activity!!.hideProgress()
+    activity?.hideProgress()
 }
 
 //fun Fragment.showStatus(message: String? = null) = activity!!.showStatus(message)
@@ -28,7 +28,7 @@ fun Fragment.hideProgress() {
 //fun Fragment.hideStatus() = activity!!.hideStatus()
 
 //check network
-fun Fragment.isNetConnected(showStatus: Boolean = true) = activity!!.isNetConnected(showStatus)
+fun Fragment.isNetConnected(showStatus: Boolean = true) = activity?.isNetConnected(showStatus)
 
 //logging extensions
 

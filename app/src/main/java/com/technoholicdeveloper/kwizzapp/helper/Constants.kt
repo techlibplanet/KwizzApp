@@ -20,4 +20,5 @@ object Constants {
 
     const val CONNECTION_TIMEOUT: Long = 60
     const val READ_TIMEOUT: Long = 60
+
 }
