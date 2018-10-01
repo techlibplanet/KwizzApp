@@ -20,6 +20,7 @@ import com.technoholicdeveloper.kwizzapp.R
 import com.technoholicdeveloper.kwizzapp.helper.Constants
 import org.jetbrains.anko.find
 import org.jetbrains.anko.support.v4.find
+import kotlin.concurrent.thread
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -45,6 +46,8 @@ class LoginFragment : Fragment(), View.OnClickListener {
 
     private lateinit var downToTop: Animation
     private lateinit var topToDown : Animation
+    private lateinit var leftToRight : Animation
+    private lateinit var rightToLeft : Animation
     private  var signInButton : SignInButton? =null
     private var appLogo : ImageView? = null
     private var appName : TextView? = null
@@ -66,9 +69,14 @@ class LoginFragment : Fragment(), View.OnClickListener {
         appName = view.find(R.id.textViewAppName)
         downToTop = AnimationUtils.loadAnimation(activity, R.anim.down_to_top)
         topToDown = AnimationUtils.loadAnimation(activity, R.anim.top_to_down)
+        leftToRight = AnimationUtils.loadAnimation(activity, R.anim.left_to_right)
+        rightToLeft = AnimationUtils.loadAnimation(activity, R.anim.right_to_left)
+
         appLogo?.animation = topToDown
         appName?.animation = topToDown
         signInButton?.animation = downToTop
+
+
         signInButton?.setOnClickListener(this)
         return view
     }

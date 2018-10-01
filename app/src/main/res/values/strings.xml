@@ -87,4 +87,14 @@
         <item>5000</item>
         <item>10000</item>
     </string-array>
+
+
+    <!--Achievements-->
+    <string name="beginner">CgkIv7-g2sIWEAIQCQ</string>
+
+    <!--Leaderboards-->
+
+    <string name="global">CgkIv7-g2sIWEAIQCg</string>
+
+
 </resources>

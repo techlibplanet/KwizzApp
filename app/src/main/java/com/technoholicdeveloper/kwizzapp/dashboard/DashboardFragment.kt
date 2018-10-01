@@ -17,6 +17,7 @@ import com.google.android.gms.games.Games
 import com.technoholicdeveloper.kwizzapp.MainActivity
 
 import com.technoholicdeveloper.kwizzapp.R
+import com.technoholicdeveloper.kwizzapp.SampleActivity
 import com.technoholicdeveloper.kwizzapp.helper.Constants
 import com.technoholicdeveloper.kwizzapp.login.LoginFragment
 import com.technoholicdeveloper.kwizzapp.play.GameMenuFragment
@@ -27,6 +28,10 @@ import net.rmitsolutions.mfexpert.lms.helpers.showDialog
 import net.rmitsolutions.mfexpert.lms.helpers.switchToFragment
 import org.jetbrains.anko.find
 import kotlin.math.sign
+import com.google.android.gms.tasks.OnFailureListener
+import com.google.android.gms.tasks.OnSuccessListener
+
+
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -95,8 +100,10 @@ class DashboardFragment : Fragment(), View.OnClickListener {
             }
             R.id.buttonLeaderboards ->{
                 Games.getLeaderboardsClient(activity!!, GoogleSignIn.getLastSignedInAccount(activity)!!)
-                        .getLeaderboardIntent(getString(R.string.leaderboard_global_rank))
+                        .getLeaderboardIntent(getString(R.string.global))
                         .addOnSuccessListener { intent -> startActivityForResult(intent, Constants.RC_LEADERBOARD_UI) }
+
+
             }
 
             R.id.buttonWallet ->{
@@ -107,6 +114,8 @@ class DashboardFragment : Fragment(), View.OnClickListener {
             R.id.buttonPlay ->{
                 val playMenuFragment = GameMenuFragment()
                 switchToFragment(activity!!,playMenuFragment)
+//                val intent = Intent(activity, SampleActivity::class.java)
+//                startActivity(intent)
 
             }
         }

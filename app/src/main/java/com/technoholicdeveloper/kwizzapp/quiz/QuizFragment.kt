@@ -160,7 +160,7 @@ class QuizFragment : Fragment(), View.OnClickListener {
     private fun setTimerValues() {
         var time = -1
         // assigning values after converting to milliseconds
-        time = if (subjectCode == "apt_ques"){
+        time = if (subjectCode == "aptitude"){
             6
         }else{
             1

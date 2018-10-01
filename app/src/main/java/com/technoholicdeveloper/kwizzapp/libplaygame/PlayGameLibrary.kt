@@ -63,7 +63,7 @@ class PlayGameLibrary (private val activity: Activity){
         // not playing.
         var mRoomId: String? = null
         // The participants in the currently active game
-        lateinit var mParticipants: ArrayList<Participant>
+        var mParticipants: ArrayList<Participant>? = null
         // My participant ID in the currently active game
         var mMyId: String? = null
         // Request codes for the UIs that we show with startActivityForResult:
@@ -125,7 +125,7 @@ class PlayGameLibrary (private val activity: Activity){
         GameConstants.mRoomConfig = null
         GameConstants.mFinishedParticipants.clear()
         GameConstants.mParticipantScore.clear()
-        GameConstants.mParticipants.clear()
+        GameConstants.mParticipants?.clear()
         GameConstants.modelList.clear()
         GameConstants.balanceAdded = false
 
@@ -437,7 +437,7 @@ class PlayGameLibrary (private val activity: Activity){
             switchToFragment(gameDetailFragment)
             activity.hideProgress()
 
-            for (p in GameConstants.mParticipants){
+            for (p in GameConstants.mParticipants!!){
                 Log.d(TAG, "Participants Display Name "+p.displayName)
             }
 
@@ -742,7 +742,7 @@ class PlayGameLibrary (private val activity: Activity){
         mResultBuf[2] = wrong.toByte()
         mResultBuf[3] = drop.toByte()
 
-        for (p in GameConstants.mParticipants){
+        for (p in GameConstants.mParticipants!!){
             if (p.participantId == GameConstants.mMyId) {
                 continue
             }
@@ -762,8 +762,8 @@ class PlayGameLibrary (private val activity: Activity){
         mMsgBuffer[1] = score.toByte()
 
 
-        Log.d(TAG, "List size - ${GameConstants.mParticipants.size}")
-        for (p in GameConstants.mParticipants){
+        Log.d(TAG, "List size - ${GameConstants.mParticipants?.size}")
+        for (p in GameConstants.mParticipants!!){
             if (p.participantId == GameConstants.mMyId) {
                 continue
             }
@@ -799,7 +799,7 @@ class PlayGameLibrary (private val activity: Activity){
         GameConstants.mMsgBuf[1] = mScore.toByte()
 
         // Send to every other participant.
-        for (p in GameConstants.mParticipants) {
+        for (p in GameConstants.mParticipants!!) {
             if (p.participantId == GameConstants.mMyId) {
                 continue
             }

@@ -131,10 +131,20 @@ class MainActivity : BaseActivity(), LoginFragment.OnFragmentInteractionListener
                 putPref(SharedPrefKeys.PLAYER_ID, mPlayerId!!)
                 putPref( SharedPrefKeys.DISPLAY_NAME, player.displayName)
                 //val intent = Intent(this@MainActivity, DashboardActivity::class.java)
-                val nameArray = player.name.split(" ")
+                var nameArray : List<String>? = null
+                if (player.name !=null){
+                    nameArray = player.name.split(" ")
+                }
+
                 logD("Player Name - ${player.name}")
-                putPref( SharedPrefKeys.FIRST_NAME, nameArray[0])
-                putPref( SharedPrefKeys.LAST_NAME, nameArray[1])
+                var firstName = nameArray?.get(0)
+                var lastName = nameArray?.get(1)
+                if (firstName==null && lastName==null){
+                    firstName = "Default"
+                    lastName = "Default"
+                }
+                putPref( SharedPrefKeys.FIRST_NAME, firstName)
+                putPref( SharedPrefKeys.LAST_NAME, lastName)
                 //startActivity(intent)
                 logD("${getPref(SharedPrefKeys.FIRST_NAME, "")}")
                 val email = getPref(SharedPrefKeys.EMAIL, "")

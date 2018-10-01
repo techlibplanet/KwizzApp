@@ -25,14 +25,17 @@ import com.technoholicdeveloper.kwizzapp.result.adapter.FinalResultViewModel
 import com.technoholicdeveloper.kwizzapp.result.adapter.ResultViewAdapter
 import com.technoholicdeveloper.kwizzapp.viewhelper.ShowResultProgress
 import com.technoholicdeveloper.kwizzapp.viewmodels.ResultViewModel
+import com.technoholicdeveloper.kwizzapp.viewmodels.TestViewModel
 import net.rmitsolutions.mfexpert.lms.helpers.hideProgress
 import net.rmitsolutions.mfexpert.lms.helpers.logD
 import net.rmitsolutions.mfexpert.lms.helpers.showDialog
 import net.rmitsolutions.mfexpert.lms.helpers.showProgress
 import org.jetbrains.anko.find
+import org.jetbrains.anko.support.v4.find
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.lang.Comparable
 import java.util.*
 
 // TODO: Rename parameter arguments, choose names that match
@@ -69,6 +72,7 @@ class GameResultFragment : Fragment(), View.OnClickListener {
     val adapter: ResultViewAdapter by lazy { ResultViewAdapter() }
     private var playGameLibrary : PlayGameLibrary ? =null
     private lateinit var buttonBack : Button
+    private lateinit var list : MutableList<ResultViewModel>
 
     private lateinit var showResultProgress: ShowResultProgress
 
@@ -81,7 +85,9 @@ class GameResultFragment : Fragment(), View.OnClickListener {
             amount = it.getFloat(AMOUNT)
         }
         playGameLibrary = PlayGameLibrary(activity!!)
+        resultList = mutableListOf<ResultViewModel>()
         showResultProgress = ShowResultProgress()
+        list = mutableListOf<ResultViewModel>()
 
         logD( "Right Answers - $rightAnswers")
         logD("Wrong Answers - $wrongAnswers")
@@ -118,9 +124,9 @@ class GameResultFragment : Fragment(), View.OnClickListener {
     private fun setItem(){
         PlayGameLibrary.GameConstants.modelList.clear()
         logD("Own Image uri - ${PlayGameLibrary.GameConstants.imageUri}")
-        PlayGameLibrary.GameConstants.modelList.add(ResultViewModel(PlayGameLibrary.GameConstants.displayName!!,"$rightAnswers", PlayGameLibrary.GameConstants.imageUri))
+        PlayGameLibrary.GameConstants.modelList.add(ResultViewModel(PlayGameLibrary.GameConstants.displayName!!,rightAnswers!!, PlayGameLibrary.GameConstants.imageUri))
 
-        for (p in PlayGameLibrary.GameConstants.mParticipants) {
+        for (p in PlayGameLibrary.GameConstants.mParticipants!!) {
             if (PlayGameLibrary.GameConstants.mRoomId != null) {
                 val pid = p.participantId
                 if (pid == PlayGameLibrary.GameConstants.mMyId) {
@@ -139,9 +145,13 @@ class GameResultFragment : Fragment(), View.OnClickListener {
         adapter.notifyDataSetChanged()
     }
 
+    private lateinit var resultList : List<ResultViewModel>
+
+
+
     private fun updateScore() {
         if (PlayGameLibrary.GameConstants.mRoomId!=null){
-            for (p in PlayGameLibrary.GameConstants.mParticipants){
+            for (p in PlayGameLibrary.GameConstants.mParticipants!!){
                 val pid = p.participantId
                 if (pid == PlayGameLibrary.GameConstants.mMyId) {
                     continue
@@ -150,77 +160,160 @@ class GameResultFragment : Fragment(), View.OnClickListener {
                     continue
                 }
 
+                if (PlayGameLibrary.GameConstants.mParticipants?.size != PlayGameLibrary.GameConstants.mFinishedParticipants.size){
+                    continue
+                }
+
                 val score = if (PlayGameLibrary.GameConstants.mParticipantScore.containsKey(pid)) PlayGameLibrary.GameConstants.mParticipantScore.get(pid) else 0
+                logD("Participants size = ${PlayGameLibrary.GameConstants.mParticipants?.size} Finished Participants size - ${PlayGameLibrary.GameConstants.mFinishedParticipants.size}")
 
-                if (PlayGameLibrary.GameConstants.mParticipants.size == PlayGameLibrary.GameConstants.mFinishedParticipants.size){
+                if (PlayGameLibrary.GameConstants.mParticipants?.size == PlayGameLibrary.GameConstants.mFinishedParticipants.size){
+                    if (p.displayName != PlayGameLibrary.GameConstants.displayName){
+                        PlayGameLibrary.GameConstants.modelList.add(ResultViewModel(p.displayName, score!!, p.iconImageUri))
 
-                    logD("Other image uri - ${p.iconImageUri}")
-                    PlayGameLibrary.GameConstants.modelList.add(ResultViewModel(p.displayName, "$score",p.iconImageUri))
+                        for (data in PlayGameLibrary.GameConstants.modelList){
+                            logD("Before - PlayerName : ${data.playerName} Marks - ${data.rightAnswers} Image Uri - ${data.imageUri}")
+                        }
 
-                    logD("All players finished the game...")
+//                    val result = Collections.max(PlayGameLibrary.GameConstants.modelList, compResult())
 
-                    PlayGameLibrary.GameConstants.modelList.sortByDescending {
-                        it.rightAnswers
-                    }
+//                    logD("Result Player Name - ${result.playerName} score - ${result.rightAnswers}")
+                        resultList = PlayGameLibrary.GameConstants.modelList.sortedByDescending {
+                            it.rightAnswers
+                        }
 
-                    val result = Collections.min(PlayGameLibrary.GameConstants.modelList, compResult())
-                    logD("Result max value is = Player Name ${result.playerName}, Player score - ${result.rightAnswers}")
-//                    showDialog(activity!!, "Summary", "Winner - ${result.playerName} \nScore - ${result.rightAnswers}")
-                    if (result.playerName == PlayGameLibrary.GameConstants.displayName){
-                        if (PlayGameLibrary.GameConstants.modelList[1].rightAnswers == result.rightAnswers){
-                            showDialog(activity!!, "Result", "Tie between ${result.playerName} and ${PlayGameLibrary.GameConstants.modelList[1].playerName}!")
-                        }else{
-                            var totalAmount = (amount?.times(PlayGameLibrary.GameConstants.mFinishedParticipants.size))?.times(80)?.div(100)
+//                        Comparable<ResultViewModel> {
+//                            it.rightAnswers
+//                        }
 
-                            logD("Total amount - $totalAmount")
-                            val message = "Congrats! You Win!\nAmount Bid - $amount\nAmount Win - ${totalAmount}"
-                            if (!PlayGameLibrary.GameConstants.balanceAdded){
-                                PlayGameLibrary.GameConstants.balanceAdded = true
-                                updateBalance(PlayGameLibrary.GameConstants.displayName!!, totalAmount, Calendar.getInstance().time.toString(), message)
-                            }
+                        for (data in resultList){
+                            logD("After - PlayerName : ${data.playerName} Marks - ${data.rightAnswers} Image Uri - ${data.imageUri}")
                         }
                     }else {
-                        val message = "Sorry! You Loose!\nAmount Bid - $amount\nAmount Loose - $amount"
-                        if (!PlayGameLibrary.GameConstants.balanceAdded){
-                            PlayGameLibrary.GameConstants.balanceAdded = true
-                            //subtractBalance(PlayGameLibrary.GameConstants.displayName!!, amount, Calendar.getInstance().time.toString(), message)
-                            if (PlayGameLibrary.GameConstants.modelList[0].playerName != "Player Name"){
-                                PlayGameLibrary.GameConstants.modelList.add(0,ResultViewModel("Player Name", "Scores", null))
-                            }
-                            setRecyclerViewAdapter(PlayGameLibrary.GameConstants.modelList)
-                            showDialog(activity!!, "Summary", "$message")
-                        }
+                        logD("Display name are same")
                     }
-                    buttonBack.visibility = View.VISIBLE
-                    showResultProgress.hideProgressDialog()
 
+
+
+
+
+                }else{
+                    logD("Playgame participants and finished size is not equal")
                 }
+
+
+
+                showResultProgress.hideProgressDialog()
+                buttonBack.visibility = View.VISIBLE
+
+//                if (PlayGameLibrary.GameConstants.mParticipants.size == PlayGameLibrary.GameConstants.mFinishedParticipants.size){
+//                    logD("List size is equal")
+//
+//                    logD("Other image uri - ${p.iconImageUri}")
+//                    PlayGameLibrary.GameConstants.modelList.add(ResultViewModel(p.displayName, "$score",p.iconImageUri))
+//
+//                    logD("All players finished the game...")
+//
+////                    PlayGameLibrary.GameConstants.modelList.sortByDescending {
+////                        it.rightAnswers
+////                    }
+//
+//                    for (data in PlayGameLibrary.GameConstants.modelList){
+//                        logD("inside loop Before - PlayerName : ${data.playerName} Marks - ${data.rightAnswers} Image Uri - ${data.imageUri}")
+//                    }
+//
+//                    list = bubbleSortResult(PlayGameLibrary.GameConstants.modelList)
+//
+//                    for (data in list){
+//                        logD("inside loop After - PlayerName : ${data.playerName} Marks - ${data.rightAnswers} Image Uri - ${data.imageUri}")
+//                    }
+//
+//
+//
+//
+//
+//
+//
+//
+//                    //val result = Collections.max(PlayGameLibrary.GameConstants.modelList, compResult())
+////                    logD("Result max value is = Player Name ${result.playerName}, Player score - ${result.rightAnswers}")
+////                    showDialog(activity!!, "Summary", "Winner - ${result.playerName} \nScore - ${result.rightAnswers}")
+////                    if (list[0].playerName == PlayGameLibrary.GameConstants.displayName){
+////                        if (list[1].rightAnswers == list[0].rightAnswers &&
+////                                list[0].playerName != PlayGameLibrary.GameConstants.displayName){
+////                            showDialog(activity!!, "Result", "Tie between ${list[0].playerName} and ${list[1].playerName}!")
+////                        }else{
+////                            var totalAmount = (amount?.times(PlayGameLibrary.GameConstants.mFinishedParticipants.size))?.times(80)?.div(100)
+////
+////                            logD("Total amount - $totalAmount")
+////                            val message = "Congrats! You Win!\nAmount Bid - $amount\nAmount Win - ${totalAmount}"
+////                            if (!PlayGameLibrary.GameConstants.balanceAdded){
+////                                PlayGameLibrary.GameConstants.balanceAdded = true
+////                                updateBalance(PlayGameLibrary.GameConstants.displayName!!, totalAmount, Calendar.getInstance().time.toString(), message)
+////                            }
+////                        }
+////                    }else {
+////                        val message = "Sorry! You Loose!\nAmount Bid - $amount\nAmount Loose - $amount"
+////                        if (!PlayGameLibrary.GameConstants.balanceAdded){
+////                            PlayGameLibrary.GameConstants.balanceAdded = true
+////                            //subtractBalance(PlayGameLibrary.GameConstants.displayName!!, amount, Calendar.getInstance().time.toString(), message)
+////                            if (list[0].playerName != "Player Name"){
+////                                list.add(0,ResultViewModel("Player Name", "Scores", null))
+////                            }
+////                            setRecyclerViewAdapter(list)
+////                            showDialog(activity!!, "Summary", "$message")
+////                        }
+////                    }
+//                    buttonBack.visibility = View.VISIBLE
+//                    showResultProgress.hideProgressDialog()
+//
+//                }else {
+//                    logD("List size is not equal")
+//                }
             }
+
+            setRecyclerViewAdapter(resultList)
+
+
         }
     }
 
-    private fun subtractBalance(playerName: String, amount: Float?, timeStamp: String, message : String) {
-        val apiClient = ApiClient()
-        var retrofit = apiClient.getService<Itransaction>()
-        retrofit.subtractResultBalance(playerName, amount!!, timeStamp).enqueue(object : Callback<Transactions>{
-            override fun onFailure(call: Call<Transactions>?, t: Throwable?) {
-                showDialog(activity!!, "Error", "Error : $t")
-            }
+//    private fun subtractBalance(playerName: String, amount: Float?, timeStamp: String, message : String) {
+//        val apiClient = ApiClient()
+//        var retrofit = apiClient.getService<Itransaction>()
+//        retrofit.subtractResultBalance(playerName, amount!!, timeStamp).enqueue(object : Callback<Transactions>{
+//            override fun onFailure(call: Call<Transactions>?, t: Throwable?) {
+//                showDialog(activity!!, "Error", "Error : $t")
+//            }
+//
+//            override fun onResponse(call: Call<Transactions>?, response: Response<Transactions>?) {
+//                if (response?.isSuccessful!!){
+//                    val balance = response.body()?.balance
+//                    if (PlayGameLibrary.GameConstants.modelList[0].playerName != "Player Name"){
+//                        PlayGameLibrary.GameConstants.modelList.add(0,ResultViewModel("Player Name", "Scores", null))
+//                    }
+//                    setRecyclerViewAdapter(PlayGameLibrary.GameConstants.modelList)
+//                    showDialog(activity!!, "Summary", "$message\nBalance : $balance")
+//                }else{
+//                    showDialog(activity!!, "Summary", "$message\nError : ${response.body()?.error}")
+//                }
+//            }
+//
+//        })
+//    }
 
-            override fun onResponse(call: Call<Transactions>?, response: Response<Transactions>?) {
-                if (response?.isSuccessful!!){
-                    val balance = response.body()?.balance
-                    if (PlayGameLibrary.GameConstants.modelList[0].playerName != "Player Name"){
-                        PlayGameLibrary.GameConstants.modelList.add(0,ResultViewModel("Player Name", "Scores", null))
-                    }
-                    setRecyclerViewAdapter(PlayGameLibrary.GameConstants.modelList)
-                    showDialog(activity!!, "Summary", "$message\nBalance : $balance")
-                }else{
-                    showDialog(activity!!, "Summary", "$message\nError : ${response.body()?.error}")
+    private fun bubbleSortResult(modelList: MutableList<ResultViewModel>): MutableList<ResultViewModel> {
+        var tempList: ResultViewModel
+        for (i in 0 until modelList.size){
+            for (j in 0 until modelList.size){
+                if (modelList[i].rightAnswers > modelList[j].rightAnswers){
+                    tempList = modelList[i]
+                    modelList[i] = modelList[j]
+                    modelList[j] = tempList
                 }
             }
-
-        })
+        }
+        return modelList
     }
 
     private fun updateBalance(displayName: String, totalAmount: Float?, timeStamp: String, message : String) {
@@ -235,15 +328,20 @@ class GameResultFragment : Fragment(), View.OnClickListener {
                 if (response?.isSuccessful!!){
                     val balance = response.body()?.balance
                     logD("Message - $message Balance - $balance")
-                    if (PlayGameLibrary.GameConstants.modelList[0].playerName != "Player Name"){
-                        PlayGameLibrary.GameConstants.modelList.add(0,ResultViewModel("Player Name", "Scores", null))
+                    if (list[0].playerName != "Player Name"){
+                        PlayGameLibrary.GameConstants.modelList.add(0,ResultViewModel("Player Name", "Score".toInt(), null))
                     }
+
                     showDialog(activity!!, "Summary", "$message\nBalance : $balance")
                     setRecyclerViewAdapter(PlayGameLibrary.GameConstants.modelList)
                 }
             }
 
         })
+
+    }
+
+    fun unlockAchievements(){
 
     }
 

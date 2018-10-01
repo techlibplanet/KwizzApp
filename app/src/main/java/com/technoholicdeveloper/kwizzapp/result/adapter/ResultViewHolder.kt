@@ -29,7 +29,7 @@ class ResultViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imageViewProfile = itemView.findViewById<ImageView>(R.id.playerDisplayImage)
 
         textViewPlayerName.text = resultViewModel.playerName
-        textViewRightAnswer.text = resultViewModel.rightAnswers
+        textViewRightAnswer.text = resultViewModel.rightAnswers.toString()
 
         val mgr = ImageManager.create(context)
         mgr.loadImage(imageViewProfile, resultViewModel.imageUri)
