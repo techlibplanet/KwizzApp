@@ -79,7 +79,7 @@ class MainActivity : BaseActivity(), LoginFragment.OnFragmentInteractionListener
                 // The signed in account is stored in the task's result.
                 val signedInAccount = task.result
                 logD("Task Successful")
-                onConnected(signedInAccount)
+                onConnected(signedInAccount!!)
             } else {
                 // Player will need to sign-in explicitly using via UI
                 logD("Unable to sign in silently")
